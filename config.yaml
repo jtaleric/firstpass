@@ -1,0 +1,32 @@
+# FirstPass Agent Configuration
+
+jira:
+  server: "https://redhat.atlassian.net"
+  project: "PERFSCALE"  # Update with your project key
+  component: "CPT_ISSUES"  # Only process issues with this component
+
+release_controller:
+  base_url: "https://amd64.ocp.releases.ci.openshift.org/api/v1"
+
+gcs:
+  base_url: "https://gcsweb-ci.apps.ci.l2s4.p1.openshiftapps.com/gcs"
+
+phases:
+  enabled:
+    - phase1
+
+  # Phase 1: Check payload status
+  phase1:
+    status: "New"             # Query issues with this status
+    transition_done: "Done"   # Transition name for rejected payloads
+    label: "phase1_done"      # Label to add when accepted
+
+  # Phase 2: LLM commit analysis (planned)
+  phase2:
+    status: "In Progress"           # Query issues with this status
+    label_required: "phase1_done"   # Only process issues with this label
+    label: "phase2_done"            # Label to add when complete
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
