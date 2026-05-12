@@ -23,7 +23,7 @@ graph TD
 
     ExtractStream --> GetPayloadTag[Extract payload_tag<br/>from JIRA Version Change]
 
-    GetPayloadTag --> ReleaseController[Query Release Controller API:<br/>releasestream/{stream}/release/{payload_tag}]
+    GetPayloadTag --> ReleaseController["Query Release Controller API:<br/>releasestream/(stream)/release/(payload_tag)"]
 
     ReleaseController --> Decision{Payload Phase?}
 
@@ -73,5 +73,6 @@ graph TD
     CheckNext -- Yes --> Iterate
     CheckNext -- No --> End
 ```
+
 # Phase 3
 WIP 
