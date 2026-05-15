@@ -1,8 +1,10 @@
 """Phase 2: LLM-based commit analysis for regression root cause"""
 
 import logging
-from typing import List, Optional
+from typing import List
+
 from jira.resources import Issue
+
 from .base import Phase
 
 logger = logging.getLogger(__name__)
@@ -18,8 +20,8 @@ class Phase2(Phase):
             List of JIRA issues
         """
         project = self.config.jira_project
-        status = self.get_phase_config('status', 'In Progress')
-        label_required = self.get_phase_config('label_required', 'phase1_done')
+        status = self.get_phase_config("status", "In Progress")
+        label_required = self.get_phase_config("label_required", "phase1_done")
         component = self.config.jira_component
 
         # Query for issues with status, label, and component

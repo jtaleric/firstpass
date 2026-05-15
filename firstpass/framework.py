@@ -2,12 +2,13 @@
 
 import logging
 from typing import Dict, Type
+
 from .config import Config
 from .jira_client import JiraClient
-from .release_controller import ReleaseControllerClient
 from .phases.base import Phase
 from .phases.phase1 import Phase1
 from .phases.phase2 import Phase2
+from .release_controller import ReleaseControllerClient
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +18,23 @@ class FirstPassFramework:
 
     # Registry of available phases
     PHASE_REGISTRY: Dict[str, Type[Phase]] = {
-        'phase1': Phase1,
-        'phase2': Phase2,
+        "phase1": Phase1,
+        "phase2": Phase2,
     }
 
-    def __init__(self, config_path: str = "config.yaml"):
+    def __init__(self, config_path: str = "config.yaml", dry_run: bool = False):
         """Initialize framework
 
         Args:
             config_path: Path to configuration file
+            dry_run: If True, no JIRA updates will be made
         """
         self.config = Config(config_path)
+        self.dry_run = dry_run
         self._setup_logging()
+
+        if self.dry_run:
+            logger.warning("DRY RUN MODE - No JIRA updates will be made")
 
         # Initialize clients
         self.jira_client = self._init_jira_client()
@@ -39,14 +45,12 @@ class FirstPassFramework:
 
     def _setup_logging(self):
         """Setup logging configuration"""
-        log_level = self.config.get('logging.level', 'INFO')
-        log_format = self.config.get('logging.format',
-                                     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        logging.basicConfig(
-            level=getattr(logging, log_level),
-            format=log_format
+        log_level = self.config.get("logging.level", "INFO")
+        log_format = self.config.get(
+            "logging.format", "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
+
+        logging.basicConfig(level=getattr(logging, log_level), format=log_format)
 
     def _init_jira_client(self) -> JiraClient:
         """Initialize JIRA client
@@ -59,7 +63,7 @@ class FirstPassFramework:
             email=self.config.jira_email,
             api_token=self.config.jira_api_token,
             username=self.config.jira_username,
-            password=self.config.jira_password
+            password=self.config.jira_password,
         )
 
     def _init_release_controller_client(self) -> ReleaseControllerClient:
@@ -69,8 +73,7 @@ class FirstPassFramework:
             ReleaseControllerClient instance
         """
         return ReleaseControllerClient(
-            base_url=self.config.release_controller_url,
-            gcs_base_url=self.config.gcs_base_url
+            base_url=self.config.release_controller_url, gcs_base_url=self.config.gcs_base_url
         )
 
     def _init_phases(self) -> Dict[str, Phase]:
@@ -89,7 +92,8 @@ class FirstPassFramework:
                     self.config,
                     self.jira_client,
                     self.release_controller_client,
-                    phase_name
+                    phase_name,
+                    dry_run=self.dry_run,
                 )
                 logger.info(f"Initialized {phase_name}")
             else:

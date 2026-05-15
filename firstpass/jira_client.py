@@ -2,9 +2,10 @@
 
 import logging
 from typing import List, Optional
+from urllib.parse import urlencode
+
 from jira import JIRA
 from jira.resources import Issue
-from urllib.parse import urlencode, quote
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,14 @@ logger = logging.getLogger(__name__)
 class JiraClient:
     """Client for JIRA operations"""
 
-    def __init__(self, server: str, email: str = None, api_token: str = None,
-                 username: str = None, password: str = None):
+    def __init__(
+        self,
+        server: str,
+        email: str = None,
+        api_token: str = None,
+        username: str = None,
+        password: str = None,
+    ):
         """Initialize JIRA client
 
         Args:
@@ -48,10 +55,7 @@ class JiraClient:
         logger.info(f"Querying JIRA with JQL: {jql}")
 
         # Construct the full URL for debugging
-        params = {
-            'jql': jql,
-            'maxResults': max_results
-        }
+        params = {"jql": jql, "maxResults": max_results}
         query_string = urlencode(params)
         full_url = f"{self.server}/rest/api/2/search?{query_string}"
 
@@ -96,7 +100,7 @@ class JiraClient:
         """
         jql = f'project = {project} AND status = "{status}"'
         if component:
-            jql += f' AND component = {component}'
+            jql += f" AND component = {component}"
         return self.query_issues(jql)
 
     def get_issues_by_label(self, project: str, label: str, component: str = None) -> List[Issue]:
@@ -112,7 +116,7 @@ class JiraClient:
         """
         jql = f'project = {project} AND labels = "{label}"'
         if component:
-            jql += f' AND component = {component}'
+            jql += f" AND component = {component}"
         return self.query_issues(jql)
 
     def get_field_value(self, issue: Issue, field_name: str) -> Optional[str]:
@@ -126,15 +130,15 @@ class JiraClient:
             Field value or None
         """
         # Handle built-in fields
-        if field_name.lower() == 'description':
+        if field_name.lower() == "description":
             return issue.fields.description
-        if field_name.lower() == 'summary':
+        if field_name.lower() == "summary":
             return issue.fields.summary
 
         # Handle custom fields - this may need adjustment based on your JIRA setup
         for field in self.jira.fields():
-            if field['name'].lower() == field_name.lower():
-                return getattr(issue.fields, field['id'], None)
+            if field["name"].lower() == field_name.lower():
+                return getattr(issue.fields, field["id"], None)
 
         logger.warning(f"Field '{field_name}' not found in issue {issue.key}")
         return None
@@ -149,7 +153,7 @@ class JiraClient:
         current_labels = issue.fields.labels
         if label not in current_labels:
             current_labels.append(label)
-            issue.update(fields={'labels': current_labels})
+            issue.update(fields={"labels": current_labels})
             logger.info(f"Added label '{label}' to {issue.key}")
 
     def transition_issue(self, issue: Issue, transition_name: str):
@@ -163,8 +167,8 @@ class JiraClient:
         transition_id = None
 
         for t in transitions:
-            if t['name'].lower() == transition_name.lower():
-                transition_id = t['id']
+            if t["name"].lower() == transition_name.lower():
+                transition_id = t["id"]
                 break
 
         if transition_id:

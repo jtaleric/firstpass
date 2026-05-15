@@ -24,6 +24,7 @@ wheels/
 venv/
 ENV/
 env/
+test/
 
 # IDE
 .vscode/
@@ -31,8 +32,9 @@ env/
 *.swp
 *.swo
 *~
+.claude/
 
-# Environment variables
+# Environment variables (don't copy .env into container)
 .env
 .env.local
 
@@ -50,9 +52,27 @@ coverage.xml
 htmlcov/
 .ruff_cache/
 .mypy_cache/
+tests/
 
-# Project specific
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+
+# Documentation
+*.md
+!README.md
+
+# Development files
+.pre-commit-config.yaml
+Makefile
+requirements-dev.txt
+test_jira_query.py
+pyproject.toml
+TESTING.md
+
+# Config (will be mounted at runtime)
 config.local.yaml
-
-# Container/Docker
-logs/

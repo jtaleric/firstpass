@@ -3,6 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import List
+
 from jira.resources import Issue
 
 logger = logging.getLogger(__name__)
@@ -11,7 +12,9 @@ logger = logging.getLogger(__name__)
 class Phase(ABC):
     """Base class for all phases"""
 
-    def __init__(self, config, jira_client, release_controller_client, phase_name: str):
+    def __init__(
+        self, config, jira_client, release_controller_client, phase_name: str, dry_run: bool = False
+    ):
         """Initialize phase
 
         Args:
@@ -19,11 +22,13 @@ class Phase(ABC):
             jira_client: JIRA client instance
             release_controller_client: Release Controller client instance
             phase_name: Name of this phase (e.g., 'phase1')
+            dry_run: If True, no JIRA updates will be made
         """
         self.config = config
         self.jira_client = jira_client
         self.release_controller_client = release_controller_client
         self.phase_name = phase_name
+        self.dry_run = dry_run
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def get_phase_config(self, key: str, default=None):
@@ -36,7 +41,7 @@ class Phase(ABC):
         Returns:
             Configuration value
         """
-        return self.config.get(f'phases.{self.phase_name}.{key}', default)
+        return self.config.get(f"phases.{self.phase_name}.{key}", default)
 
     @abstractmethod
     def get_target_issues(self) -> List[Issue]:

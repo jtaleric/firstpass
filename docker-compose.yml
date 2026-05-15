@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  firstpass:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: firstpass-agent:latest
+    container_name: firstpass-agent
+
+    # Environment variables from .env file
+    env_file:
+      - .env
+
+    # Override environment variables if needed
+    environment:
+      - PYTHONUNBUFFERED=1
+
+    # Mount config file and logs directory
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./logs:/app/logs
+
+    # Override default command
+    # Examples:
+    #   Run all phases: command: []
+    #   Run phase1 only: command: ["--phase", "phase1"]
+    #   Dry run: command: ["--dry-run"]
+    command: ["--dry-run"]
+
+    # Restart policy
+    restart: "no"
+
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Run in cron mode (uncomment if needed)
+  # firstpass-cron:
+  #   extends: firstpass
+  #   container_name: firstpass-agent-cron
+  #   restart: unless-stopped
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command:
+  #     - |
+  #       while true; do
+  #         echo "Running FirstPass Agent..."
+  #         python main.py
+  #         echo "Sleeping for 1 hour..."
+  #         sleep 3600
+  #       done
