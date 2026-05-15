@@ -35,12 +35,12 @@ COPY main.py .
 COPY firstpass/ firstpass/
 COPY config.yaml .
 
-# Create non-root user
-RUN useradd -m -u 1001 -g 0 firstpass && \
-    chown -R 1001:0 /app && \
+# Set up permissions for OpenShift compatibility (group 0)
+# UBI images already have user 1001, so we just set permissions
+RUN chown -R 1001:0 /app && \
     chmod -R g+rwX /app
 
-# Switch to non-root user
+# Switch to non-root user (using default UID from UBI image)
 USER 1001
 
 # Set environment variables
