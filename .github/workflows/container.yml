@@ -55,8 +55,9 @@ jobs:
         with:
           context: .
           file: ./Containerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -65,7 +66,7 @@ jobs:
       - name: Run container tests
         if: github.event_name == 'pull_request'
         run: |
-          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }} --help
+          docker run --rm ghcr.io/jtaleric/firstpass:pr-${{ github.event.pull_request.number }} --help
 
   scan:
     name: Security Scan
