@@ -41,11 +41,14 @@ class ReleaseControllerClient:
             logger.error(f"Failed to fetch build log: {e}")
             return None
 
-    def extract_release_stream(self, build_log: str) -> Optional[str]:
+    def extract_release_stream(
+        self, build_log: str, payload_tag: Optional[str] = None
+    ) -> Optional[str]:
         """Extract release stream from build log
 
         Args:
             build_log: Build log content
+            payload_tag: Optional payload tag to construct stream for forced executions
 
         Returns:
             Release stream (e.g., '5.0.0-0.nightly') or None
@@ -58,6 +61,30 @@ class ReleaseControllerClient:
             stream = match.group(1)
             logger.info(f"Extracted release stream: {stream}")
             return stream
+
+        # Check for forced execution (explicitly provided pull-spec)
+        if "Using explicitly provided pull-spec" in build_log:
+            logger.info("Detected forced execution with explicit pull-spec")
+
+            if payload_tag:
+                # Extract short version from payload_tag (e.g., "4.22" from "4.22.0-0.nightly-2026-05-11-043758")
+                # Pattern: Match major.minor at the beginning of the payload tag
+                version_pattern = r"^(\d+\.\d+)"
+                version_match = re.match(version_pattern, payload_tag)
+
+                if version_match:
+                    short_version = version_match.group(1)
+                    constructed_stream = f"{short_version}.0-0.nightly"
+                    logger.info(f"Constructed stream from payload tag: {constructed_stream}")
+                    return constructed_stream
+                else:
+                    logger.warning(
+                        f"Could not extract short version from payload tag: {payload_tag}"
+                    )
+            else:
+                logger.warning(
+                    "Forced execution detected but no payload_tag provided to construct stream"
+                )
 
         logger.warning("Could not extract release stream from build log")
         return None

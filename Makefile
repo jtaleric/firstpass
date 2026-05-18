@@ -30,9 +30,9 @@ test:
 lint:
 	@echo "Running ruff..."
 	ruff check .
-	@echo "\nRunning black check..."
+	@echo "Running black check..."
 	black --check .
-	@echo "\nRunning mypy..."
+	@echo "Running mypy..."
 	mypy firstpass --ignore-missing-imports
 
 format:
