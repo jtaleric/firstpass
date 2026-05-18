@@ -18,35 +18,29 @@ from firstpass.framework import FirstPassFramework
 def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
-        description='FirstPass Agent - OpenShift Performance Regression Triage'
+        description="FirstPass Agent - OpenShift Performance Regression Triage"
     )
 
     parser.add_argument(
-        '--config',
-        default='config.yaml',
-        help='Path to configuration file (default: config.yaml)'
+        "--config", default="config.yaml", help="Path to configuration file (default: config.yaml)"
     )
 
     parser.add_argument(
-        '--phase',
-        choices=['phase1', 'phase2'],
-        help='Run specific phase only (default: run all enabled phases)'
+        "--phase",
+        choices=["phase1", "phase2"],
+        help="Run specific phase only (default: run all enabled phases)",
     )
 
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Dry run mode - no JIRA updates'
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Dry run mode - no JIRA updates")
 
     args = parser.parse_args()
 
     # Initialize framework
-    framework = FirstPassFramework(config_path=args.config)
+    framework = FirstPassFramework(config_path=args.config, dry_run=args.dry_run)
 
     # Run framework
     framework.run(phase=args.phase)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

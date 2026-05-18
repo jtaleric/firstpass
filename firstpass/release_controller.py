@@ -2,9 +2,9 @@
 
 import logging
 import re
+from typing import Any, Dict, Optional
+
 import requests
-from typing import Optional, Dict, Any
-from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class ReleaseControllerClient:
             Release stream (e.g., '5.0.0-0.nightly') or None
         """
         # Pattern: Requesting a release from https://amd64.ocp.releases.ci.openshift.org/api/v1/releasestream/5.0.0-0.nightly/latest
-        pattern = r'Requesting a release from https://[^/]+/api/v1/releasestream/([^/]+)/latest'
+        pattern = r"Requesting a release from https://[^/]+/api/v1/releasestream/([^/]+)/latest"
 
         match = re.search(pattern, build_log)
         if match:
@@ -75,12 +75,12 @@ class ReleaseControllerClient:
         url = f"{self.base_url}/releasestream/{stream}/release/{payload_tag}"
 
         try:
-            logger.debug(f"=" * 80)
-            logger.debug(f"Querying Release Controller")
+            logger.debug("=" * 80)
+            logger.debug("Querying Release Controller")
             logger.debug(f"Full URL: {url}")
             logger.debug(f"Stream: {stream}")
             logger.debug(f"Payload Tag: {payload_tag}")
-            logger.debug(f"=" * 80)
+            logger.debug("=" * 80)
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
 
@@ -103,8 +103,8 @@ class ReleaseControllerClient:
         """
         release_info = self.get_release_info(stream, payload_tag)
 
-        if release_info and 'phase' in release_info:
-            phase = release_info['phase']
+        if release_info and "phase" in release_info:
+            phase = release_info["phase"]
             logger.info(f"Release phase for {payload_tag}: {phase}")
             return phase
 
@@ -129,7 +129,7 @@ class ReleaseControllerClient:
         # Pattern: Look for Prow URL
         # Example: https://prow.ci.openshift.org/view/gs/origin-ci-test/logs/periodic-ci-.../2053857063406145536
         # Exclude common markdown/URL-ending characters: ], ), >, etc.
-        prow_pattern = r'https://prow\.ci\.openshift\.org/view/gs/([^\s\]\)\>]+)'
+        prow_pattern = r"https://prow\.ci\.openshift\.org/view/gs/([^\s\]\)\>]+)"
 
         match = re.search(prow_pattern, description)
         if match:
@@ -142,7 +142,7 @@ class ReleaseControllerClient:
             return gcsweb_url
 
         # Fallback: Look for direct gcsweb URL ending in build-log.txt
-        gcsweb_pattern = r'(https://gcsweb[^\s]+/build-log\.txt)'
+        gcsweb_pattern = r"(https://gcsweb[^\s]+/build-log\.txt)"
         match = re.search(gcsweb_pattern, description)
         if match:
             url = match.group(1)

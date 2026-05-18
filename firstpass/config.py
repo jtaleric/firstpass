@@ -1,9 +1,10 @@
 """Configuration management for FirstPass Agent"""
 
 import os
-import yaml
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
+
+import yaml
 from dotenv import load_dotenv
 
 
@@ -21,7 +22,7 @@ class Config:
 
         # Load YAML config
         self.config_path = Path(config_path)
-        with open(self.config_path, 'r') as f:
+        with open(self.config_path) as f:
             self._config = yaml.safe_load(f)
 
     def get(self, key: str, default: Any = None) -> Any:
@@ -34,7 +35,7 @@ class Config:
         Returns:
             Configuration value
         """
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._config
         for k in keys:
             if isinstance(value, dict):
@@ -46,49 +47,49 @@ class Config:
     @property
     def jira_server(self) -> str:
         """Get JIRA server URL"""
-        return self.get('jira.server')
+        return self.get("jira.server")
 
     @property
     def jira_email(self) -> str:
         """Get JIRA email from environment"""
-        return os.getenv('JIRA_EMAIL', '')
+        return os.getenv("JIRA_EMAIL", "")
 
     @property
     def jira_api_token(self) -> str:
         """Get JIRA API token from environment"""
-        return os.getenv('JIRA_API_TOKEN', '')
+        return os.getenv("JIRA_API_TOKEN", "")
 
     @property
     def jira_username(self) -> str:
         """Get JIRA username from environment (alternative auth)"""
-        return os.getenv('JIRA_USERNAME', '')
+        return os.getenv("JIRA_USERNAME", "")
 
     @property
     def jira_password(self) -> str:
         """Get JIRA password from environment (alternative auth)"""
-        return os.getenv('JIRA_PASSWORD', '')
+        return os.getenv("JIRA_PASSWORD", "")
 
     @property
     def jira_project(self) -> str:
         """Get JIRA project key"""
-        return self.get('jira.project', 'PERFSCALE')
+        return self.get("jira.project", "PERFSCALE")
 
     @property
     def jira_component(self) -> str:
         """Get JIRA component filter"""
-        return self.get('jira.component', 'CPT_ISSUES')
+        return self.get("jira.component", "CPT_ISSUES")
 
     @property
     def release_controller_url(self) -> str:
         """Get Release Controller base URL"""
-        return self.get('release_controller.base_url')
+        return self.get("release_controller.base_url")
 
     @property
     def gcs_base_url(self) -> str:
         """Get GCS base URL"""
-        return self.get('gcs.base_url')
+        return self.get("gcs.base_url")
 
     @property
     def enabled_phases(self) -> list:
         """Get list of enabled phases"""
-        return self.get('phases.enabled', ['phase1'])
+        return self.get("phases.enabled", ["phase1"])

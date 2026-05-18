@@ -3,7 +3,9 @@
 import logging
 import re
 from typing import List, Optional
+
 from jira.resources import Issue
+
 from .base import Phase
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ class Phase1(Phase):
             List of JIRA issues
         """
         project = self.config.jira_project
-        status = self.get_phase_config('status', 'New')
+        status = self.get_phase_config("status", "New")
         component = self.config.jira_component
 
         return self.jira_client.get_issues_by_status(project, status, component)
@@ -37,14 +39,14 @@ class Phase1(Phase):
             Payload tag (bad version) or None
         """
         # Get description
-        description = self.jira_client.get_field_value(issue, 'description')
+        description = self.jira_client.get_field_value(issue, "description")
 
         if description:
             # Pattern: *Version Change:* X → Y or *Version Change:* X -> Y
             # Asterisks indicate bold formatting in JIRA
             # We want Y (the bad/regression version after the arrow)
             # Use \S+ to match non-whitespace (includes hyphens in version strings)
-            pattern = r'\*?Version Change:?\*?\s*(\S+)\s*(?:→|->)\s*(\S+)'
+            pattern = r"\*?Version Change:?\*?\s*(\S+)\s*(?:→|->)\s*(\S+)"
             match = re.search(pattern, description, re.IGNORECASE)
 
             if match:
@@ -56,12 +58,12 @@ class Phase1(Phase):
                 return bad_version
 
         # Fallback: try to extract from affected versions or fix versions
-        if hasattr(issue.fields, 'versions') and issue.fields.versions:
+        if hasattr(issue.fields, "versions") and issue.fields.versions:
             payload_tag = issue.fields.versions[0].name
             self.logger.info(f"Extracted payload tag from versions: {payload_tag}")
             return payload_tag
 
-        if hasattr(issue.fields, 'fixVersions') and issue.fields.fixVersions:
+        if hasattr(issue.fields, "fixVersions") and issue.fields.fixVersions:
             payload_tag = issue.fields.fixVersions[0].name
             self.logger.info(f"Extracted payload tag from fixVersions: {payload_tag}")
             return payload_tag
@@ -81,7 +83,7 @@ class Phase1(Phase):
         self.logger.info(f"Processing issue {issue.key}: {issue.fields.summary}")
 
         # Step 1: Extract build URL from JIRA description
-        description = self.jira_client.get_field_value(issue, 'description')
+        description = self.jira_client.get_field_value(issue, "description")
         build_url = self.release_controller_client.extract_build_url_from_description(description)
 
         if not build_url:
@@ -119,30 +121,56 @@ class Phase1(Phase):
         # Step 6: Take action based on phase
         phase_lower = phase.lower()
 
-        if phase_lower == 'rejected':
-            transition_name = self.get_phase_config('transition_done', 'Done')
-            self.logger.info(f"{issue.key}: Payload {payload_tag} was REJECTED - moving to {transition_name}")
-            self.jira_client.add_comment(
-                issue,
-                f"Payload {payload_tag} was rejected by Release Controller. "
-                f"Stream: {stream}, Phase: {phase}"
+        if phase_lower == "rejected":
+            transition_name = self.get_phase_config("transition_done", "Done")
+            self.logger.info(
+                f"{issue.key}: Payload {payload_tag} was REJECTED - moving to {transition_name}"
             )
-            self.jira_client.transition_issue(issue, transition_name)
+
+            if self.dry_run:
+                self.logger.warning(
+                    f"[DRY RUN] Would add comment to {issue.key}: "
+                    f"Payload {payload_tag} was rejected by Release Controller. "
+                    f"Stream: {stream}, Phase: {phase}"
+                )
+                self.logger.warning(
+                    f"[DRY RUN] Would transition {issue.key} to '{transition_name}'"
+                )
+            else:
+                self.jira_client.add_comment(
+                    issue,
+                    f"Payload {payload_tag} was rejected by Release Controller. "
+                    f"Stream: {stream}, Phase: {phase}",
+                )
+                self.jira_client.transition_issue(issue, transition_name)
             return True
 
-        elif phase_lower == 'accepted':
-            label = self.get_phase_config('label', 'phase1_done')
-            self.logger.info(f"{issue.key}: Payload {payload_tag} was ACCEPTED - advancing to Phase 2")
-            self.jira_client.add_comment(
-                issue,
-                f"Payload {payload_tag} was accepted by Release Controller. "
-                f"Stream: {stream}, Phase: {phase}. Moving to Phase 2 for analysis."
+        elif phase_lower == "accepted":
+            label = self.get_phase_config("label", "phase1_done")
+            self.logger.info(
+                f"{issue.key}: Payload {payload_tag} was ACCEPTED - advancing to Phase 2"
             )
-            self.jira_client.add_label(issue, label)
-            # Optionally transition to a different status for Phase 2
-            # self.jira_client.transition_issue(issue, 'In Progress')
+
+            if self.dry_run:
+                self.logger.warning(
+                    f"[DRY RUN] Would add comment to {issue.key}: "
+                    f"Payload {payload_tag} was accepted by Release Controller. "
+                    f"Stream: {stream}, Phase: {phase}. Moving to Phase 2 for analysis."
+                )
+                self.logger.warning(f"[DRY RUN] Would add label '{label}' to {issue.key}")
+            else:
+                self.jira_client.add_comment(
+                    issue,
+                    f"Payload {payload_tag} was accepted by Release Controller. "
+                    f"Stream: {stream}, Phase: {phase}. Moving to Phase 2 for analysis.",
+                )
+                self.jira_client.add_label(issue, label)
+                # Optionally transition to a different status for Phase 2
+                # self.jira_client.transition_issue(issue, 'In Progress')
             return True
 
         else:
-            self.logger.info(f"{issue.key}: Payload {payload_tag} is in phase '{phase}' - leaving in NEW")
+            self.logger.info(
+                f"{issue.key}: Payload {payload_tag} is in phase '{phase}' - leaving in NEW"
+            )
             return True

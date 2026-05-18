@@ -43,6 +43,26 @@ Phase 1 automatically checks if OpenShift payloads have been accepted or rejecte
 
 ## Installation
 
+### Option 1: Using Containers (Recommended)
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd firstpass
+
+# Configure credentials
+cp .env.example .env
+# Edit .env with your JIRA credentials
+
+# Build and run with docker-compose
+docker-compose build
+docker-compose run --rm firstpass --dry-run
+```
+
+See [CONTAINER.md](CONTAINER.md) for detailed container documentation.
+
+### Option 2: Native Python
+
 1. Clone the repository:
 ```bash
 git clone <repo-url>
@@ -195,6 +215,54 @@ phases:
   - `jira_client.py` - JIRA operations
   - `release_controller.py` - Release Controller API
   - `phases/` - Phase implementations
+- `tests/` - Test suite
+
+### Setup Development Environment
+
+1. Install development dependencies:
+```bash
+make install-dev
+# or manually:
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
+### Running Tests
+
+Run the test suite with coverage:
+```bash
+make test
+# or:
+pytest -v --cov=firstpass --cov-report=term-missing
+```
+
+### Code Quality
+
+Run linting checks:
+```bash
+make lint
+# or individually:
+ruff check .
+black --check .
+mypy firstpass --ignore-missing-imports
+```
+
+Auto-format code:
+```bash
+make format
+# or individually:
+black .
+ruff check --fix .
+```
+
+### Continuous Integration
+
+The project uses GitHub Actions for CI/CD:
+- **Linting**: Runs ruff, black, and mypy checks
+- **Testing**: Runs tests on Python 3.8-3.12
+- **Security**: Runs bandit and safety checks
+- **Build**: Creates distribution packages
+
+All checks must pass before merging pull requests.
 
 ### Adding Features
 
@@ -202,6 +270,7 @@ The framework is designed to be extended:
 - Add new phase classes in `phases/`
 - Add new clients for external services
 - Extend configuration in `config.yaml`
+- Write tests for new functionality in `tests/`
 
 ## Troubleshooting
 
