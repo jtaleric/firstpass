@@ -97,18 +97,18 @@ class Phase1(Phase):
             self.logger.warning(f"{issue.key}: Could not fetch build log - skipping")
             return False
 
-        # Step 3: Extract release stream from build log
-        stream = self.release_controller_client.extract_release_stream(build_log)
-
-        if not stream:
-            self.logger.warning(f"{issue.key}: Could not extract release stream - skipping")
-            return False
-
-        # Step 4: Extract payload tag from JIRA
+        # Step 3: Extract payload tag from JIRA (needed for stream extraction in forced execution cases)
         payload_tag = self.extract_payload_tag(issue)
 
         if not payload_tag:
             self.logger.warning(f"{issue.key}: Could not extract payload tag - skipping")
+            return False
+
+        # Step 4: Extract release stream from build log (pass payload_tag for forced execution support)
+        stream = self.release_controller_client.extract_release_stream(build_log, payload_tag)
+
+        if not stream:
+            self.logger.warning(f"{issue.key}: Could not extract release stream - skipping")
             return False
 
         # Step 5: Query Release Controller for release phase
