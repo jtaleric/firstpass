@@ -33,13 +33,22 @@ def main():
 
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode - no JIRA updates")
 
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="Generate regression report from open JIRA issues",
+    )
+
     args = parser.parse_args()
 
     # Initialize framework
     framework = FirstPassFramework(config_path=args.config, dry_run=args.dry_run)
 
-    # Run framework
-    framework.run(phase=args.phase)
+    # Run report or normal processing
+    if args.report:
+        framework.generate_report()
+    else:
+        framework.run(phase=args.phase)
 
 
 if __name__ == "__main__":

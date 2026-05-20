@@ -47,7 +47,7 @@ class Config:
     @property
     def jira_server(self) -> str:
         """Get JIRA server URL"""
-        return self.get("jira.server")
+        return str(self.get("jira.server"))
 
     @property
     def jira_email(self) -> str:
@@ -72,24 +72,25 @@ class Config:
     @property
     def jira_project(self) -> str:
         """Get JIRA project key"""
-        return self.get("jira.project", "PERFSCALE")
+        return str(self.get("jira.project", "PERFSCALE"))
 
     @property
     def jira_component(self) -> str:
         """Get JIRA component filter"""
-        return self.get("jira.component", "CPT_ISSUES")
+        return str(self.get("jira.component", "CPT_ISSUES"))
 
     @property
     def release_controller_url(self) -> str:
         """Get Release Controller base URL"""
-        return self.get("release_controller.base_url")
+        return str(self.get("release_controller.base_url"))
 
     @property
     def gcs_base_url(self) -> str:
         """Get GCS base URL"""
-        return self.get("gcs.base_url")
+        return str(self.get("gcs.base_url"))
 
     @property
     def enabled_phases(self) -> list:
         """Get list of enabled phases"""
-        return self.get("phases.enabled", ["phase1"])
+        result = self.get("phases.enabled", ["phase1"])
+        return list(result) if result else ["phase1"]

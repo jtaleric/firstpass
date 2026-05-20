@@ -20,6 +20,7 @@ firstpass/
 ├── config.py                 # Configuration management
 ├── jira_client.py            # JIRA API interactions
 ├── release_controller.py     # Release Controller API client
+├── report.py                 # Regression reporting and analysis
 └── phases/
     ├── base.py               # Base phase class
     ├── phase1.py             # Phase 1 implementation
@@ -135,6 +136,43 @@ python main.py
 
 ```bash
 python main.py --phase phase1
+```
+
+### Generate Regression Report
+
+Generate a comprehensive report of all open regressions:
+
+```bash
+python main.py --report
+```
+
+The report provides multiple views of regression data:
+
+**Summary Tables:**
+- **By Short Version**: Quick overview of issue counts per major.minor version (e.g., 4.22, 5.0)
+- **By Payload Version**: Complete list of all affected payload versions sorted by issue count
+
+**Detailed Analysis:**
+- **Regressions by Version**: Detailed tables for each version showing JIRA key, metric name, last known good build, bad build, and status
+- **Top Payload Versions**: Top 10 most problematic payload versions with sample metrics
+- **Cross-Version Metric Analysis**: Identifies metrics failing across multiple versions and dates
+  - Useful for detecting test infrastructure issues vs. genuine regressions
+  - Shows all affected versions for each metric
+  - Highlights systemic problems requiring immediate attention
+
+**Output Format:**
+- Clean, aligned text tables suitable for terminal viewing or piping to files
+- Total regression count at the top
+- Progressive detail from high-level summaries to detailed breakdowns
+- All version transitions (good → bad) clearly displayed
+
+**Example:**
+```bash
+# View in terminal
+python main.py --report
+
+# Save to file
+python main.py --report > regression-report-2026-05-20.txt
 ```
 
 ### Custom Configuration
