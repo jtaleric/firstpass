@@ -1,7 +1,7 @@
 """Core framework for FirstPass Agent"""
 
 import logging
-from typing import Dict, Type
+from typing import Dict, Optional, Type
 
 from .config import Config
 from .jira_client import JiraClient
@@ -9,6 +9,7 @@ from .phases.base import Phase
 from .phases.phase1 import Phase1
 from .phases.phase2 import Phase2
 from .release_controller import ReleaseControllerClient
+from .report import RegressionReport
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ class FirstPassFramework:
             logger.info(f"=== Running {phase_name} ===")
             phase.run()
 
-    def run(self, phase: str = None):
+    def run(self, phase: Optional[str] = None):
         """Run the framework
 
         Args:
@@ -136,3 +137,16 @@ class FirstPassFramework:
             self.run_all_phases()
 
         logger.info("FirstPass Agent complete")
+
+    def generate_report(self):
+        """Generate and display regression report"""
+        logger.info("Generating regression report")
+
+        reporter = RegressionReport(
+            jira_client=self.jira_client,
+            project=self.config.jira_project,
+            component=self.config.jira_component,
+        )
+
+        report = reporter.generate_report()
+        print(report)

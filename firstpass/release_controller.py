@@ -111,7 +111,7 @@ class ReleaseControllerClient:
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
 
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             logger.info(f"Release info retrieved for {payload_tag}")
             return data
         except requests.RequestException as e:
@@ -131,7 +131,7 @@ class ReleaseControllerClient:
         release_info = self.get_release_info(stream, payload_tag)
 
         if release_info and "phase" in release_info:
-            phase = release_info["phase"]
+            phase = str(release_info["phase"])
             logger.info(f"Release phase for {payload_tag}: {phase}")
             return phase
 

@@ -28,7 +28,8 @@ class Phase2(Phase):
         jql = f'project = {project} AND status = "{status}" AND labels = "{label_required}"'
         if component:
             jql += f' AND component = "{component}"'
-        return self.jira_client.query_issues(jql)
+        issues: List[Issue] = self.jira_client.query_issues(jql)
+        return issues
 
     def process_issue(self, issue: Issue) -> bool:
         """Process a single JIRA issue with LLM analysis

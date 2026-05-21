@@ -24,7 +24,8 @@ class Phase1(Phase):
         status = self.get_phase_config("status", "New")
         component = self.config.jira_component
 
-        return self.jira_client.get_issues_by_status(project, status, component)
+        issues: List[Issue] = self.jira_client.get_issues_by_status(project, status, component)
+        return issues
 
     def extract_payload_tag(self, issue: Issue) -> Optional[str]:
         """Extract payload tag (bad version) from JIRA issue description
@@ -59,12 +60,12 @@ class Phase1(Phase):
 
         # Fallback: try to extract from affected versions or fix versions
         if hasattr(issue.fields, "versions") and issue.fields.versions:
-            payload_tag = issue.fields.versions[0].name
+            payload_tag = str(issue.fields.versions[0].name)
             self.logger.info(f"Extracted payload tag from versions: {payload_tag}")
             return payload_tag
 
         if hasattr(issue.fields, "fixVersions") and issue.fields.fixVersions:
-            payload_tag = issue.fields.fixVersions[0].name
+            payload_tag = str(issue.fields.fixVersions[0].name)
             self.logger.info(f"Extracted payload tag from fixVersions: {payload_tag}")
             return payload_tag
 

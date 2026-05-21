@@ -16,10 +16,10 @@ class JiraClient:
     def __init__(
         self,
         server: str,
-        email: str = None,
-        api_token: str = None,
-        username: str = None,
-        password: str = None,
+        email: Optional[str] = None,
+        api_token: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ):
         """Initialize JIRA client
 
@@ -87,7 +87,9 @@ class JiraClient:
         """
         return self.query_issues(jql, max_results)
 
-    def get_issues_by_status(self, project: str, status: str, component: str = None) -> List[Issue]:
+    def get_issues_by_status(
+        self, project: str, status: str, component: Optional[str] = None
+    ) -> List[Issue]:
         """Get issues by project and status
 
         Args:
@@ -103,7 +105,9 @@ class JiraClient:
             jql += f" AND component = {component}"
         return self.query_issues(jql)
 
-    def get_issues_by_label(self, project: str, label: str, component: str = None) -> List[Issue]:
+    def get_issues_by_label(
+        self, project: str, label: str, component: Optional[str] = None
+    ) -> List[Issue]:
         """Get issues by project and label
 
         Args:
